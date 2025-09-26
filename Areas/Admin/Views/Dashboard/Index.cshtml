@@ -1,0 +1,108 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@ViewBag.TotalCourses</h4>
+                        <p class="mb-0">Khóa học</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-book fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@ViewBag.TotalStudents</h4>
+                        <p class="mb-0">Học viên</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@ViewBag.TotalInstructors</h4>
+                        <p class="mb-0">Giảng viên</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-chalkboard-teacher fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@ViewBag.TotalEnrollments</h4>
+                        <p class="mb-0">Đăng ký</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-chart-line fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <h5>Menu quản trị</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <a href="/Admin/Courses" class="list-group-item list-group-item-action">
+                        <i class="fas fa-book me-2"></i>Quản lý khóa học
+                    </a>
+                    <a href="/Admin/Users" class="list-group-item list-group-item-action">
+                        <i class="fas fa-users me-2"></i>Quản lý người dùng
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Khóa học gần đây</h5>
+            </div>
+            <div class="card-body">
+                @if (ViewBag.RecentCourses != null)
+                {
+                    @foreach (var course in ViewBag.RecentCourses)
+                    {
+                        <div class="d-flex align-items-center mb-2">
+                            <img src="@course.ThumbnailUrl" class="rounded me-2" width="40" height="25" style="object-fit: cover;">
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold small">@course.Title</div>
+                                <small class="text-muted">@course.Instructor?.User?.FullName</small>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>

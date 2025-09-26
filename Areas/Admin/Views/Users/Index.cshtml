@@ -1,0 +1,87 @@
+@model IEnumerable<OnlineLearningPlatform.Models.ApplicationUser>
+@{
+    ViewData["Title"] = "Quản lý người dùng";
+}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Quản lý người dùng</h2>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Tên</th>
+                        <th>Email</th>
+                        <th>Vai trò</th>
+                        <th>Ngày tạo</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="@(user.AvatarUrl ?? "/images/default-avatar.png")" class="rounded-circle me-2" width="40" height="40">
+                                    <div>
+                                        <div class="fw-semibold">@user.FullName</div>
+                                        <small class="text-muted">@user.UserName</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@user.Email</td>
+                            <td>
+                                <span class="badge bg-@(user.Role == "Admin" ? "danger" : user.Role == "Instructor" ? "warning" : "primary")">
+                                    @user.Role
+                                </span>
+                            </td>
+                            <td>@user.CreatedAt.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                @if (user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.Now)
+                                {
+                                    <span class="badge bg-danger">Bị khóa</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Hoạt động</span>
+                                }
+                            </td>
+                            <td>
+                                @if (user.Role != "Admin")
+                                {
+                                    <button class="btn btn-sm btn-outline-warning toggle-lock" data-id="@user.Id">
+                                        @(user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.Now ? "Mở khóa" : "Khóa")
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    $('.toggle-lock').click(function() {
+        var id = $(this).data('id');
+        
+        if (confirm('Bạn có chắc muốn thay đổi trạng thái người dùng này?')) {
+            $.post('/Admin/Users/ToggleLock', { id: id })
+                .done(function(response) {
+                    if (response.success) {
+                        location.reload();
+                    }
+                });
+        }
+    });
+});
+</script>

@@ -1,0 +1,194 @@
+@model OnlineLearningPlatform.Models.ApplicationUser
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar bg-light">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Dashboard", "Member")">
+                            <i class="fas fa-tachometer-alt"></i> Tổng quan
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("MyCourses", "Member")">
+                            <i class="fas fa-book"></i> Khóa học của tôi
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Wishlist", "Member")">
+                            <i class="fas fa-heart"></i> Danh sách yêu thích
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="@Url.Action("Profile", "Member")">
+                            <i class="fas fa-user"></i> Thông tin cá nhân
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Thông tin cá nhân</h1>
+            </div>
+
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Cập nhật thông tin</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="profileForm">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="fullName" class="form-label">Họ và tên</label>
+                                        <input type="text" class="form-control" id="fullName" name="fullName" 
+                                               value="@Model.FullName" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email" 
+                                               value="@Model.Email" readonly>
+                                        <div class="form-text">Email không thể thay đổi</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="phone" class="form-label">Số điện thoại</label>
+                                        <input type="tel" class="form-control" id="phone" name="phone" 
+                                               value="@Model.Phone">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="role" class="form-label">Vai trò</label>
+                                        <input type="text" class="form-control" id="role" 
+                                               value="@Model.Role" readonly>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="bio" class="form-label">Giới thiệu bản thân</label>
+                                    <textarea class="form-control" id="bio" name="bio" rows="4" 
+                                              placeholder="Viết vài dòng giới thiệu về bản thân...">@Model.Bio</textarea>
+                                </div>
+                                
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Cập nhật thông tin
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Thông tin tài khoản</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                <img src="@(Model.AvatarUrl ?? "/images/default-avatar.png")" 
+                                     class="rounded-circle" width="100" height="100" alt="Avatar">
+                            </div>
+                            
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <strong>Tên đăng nhập:</strong><br>
+                                    <span class="text-muted">@Model.UserName</span>
+                                </li>
+                                <li class="mb-2">
+                                    <strong>Ngày tạo tài khoản:</strong><br>
+                                    <span class="text-muted">@Model.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                </li>
+                                <li class="mb-2">
+                                    <strong>Cập nhật lần cuối:</strong><br>
+                                    <span class="text-muted">@Model.UpdatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                </li>
+                                <li class="mb-2">
+                                    <strong>Trạng thái email:</strong><br>
+                                    @if (Model.EmailConfirmed)
+                                    {
+                                        <span class="badge bg-success">Đã xác thực</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning">Chưa xác thực</span>
+                                    }
+                                </li>
+                            </ul>
+                            
+                            <div class="d-grid">
+                                <a href="#" class="btn btn-outline-secondary">
+                                    <i class="fas fa-key"></i> Đổi mật khẩu
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<style>
+.sidebar {
+    min-height: calc(100vh - 56px);
+}
+
+.sidebar .nav-link {
+    color: #333;
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    background-color: #007bff;
+    color: white;
+}
+</style>
+
+<script>
+$(document).ready(function() {
+    $('#profileForm').submit(function(e) {
+        e.preventDefault();
+        
+        var formData = {
+            fullName: $('#fullName').val(),
+            phone: $('#phone').val(),
+            bio: $('#bio').val()
+        };
+        
+        var submitBtn = $(this).find('button[type="submit"]');
+        var originalText = submitBtn.html();
+        
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang cập nhật...');
+        
+        $.post('@Url.Action("UpdateProfile", "Member")', formData)
+            .done(function(response) {
+                if (response.success) {
+                    toastr.success(response.message);
+                } else {
+                    toastr.error(response.message);
+                }
+            })
+            .fail(function() {
+                toastr.error('Có lỗi xảy ra, vui lòng thử lại');
+            })
+            .always(function() {
+                submitBtn.prop('disabled', false).html(originalText);
+            });
+    });
+});
+</script>

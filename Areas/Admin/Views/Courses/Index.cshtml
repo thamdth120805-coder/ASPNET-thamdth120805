@@ -1,0 +1,106 @@
+@model IEnumerable<OnlineLearningPlatform.Models.Course>
+@{
+    ViewData["Title"] = "Quản lý khóa học";
+}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Quản lý khóa học</h2>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Tên khóa học</th>
+                        <th>Giảng viên</th>
+                        <th>Danh mục</th>
+                        <th>Giá</th>
+                        <th>Học viên</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var course in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="@course.ThumbnailUrl" class="rounded me-2" width="50" height="30" style="object-fit: cover;">
+                                    <div>
+                                        <div class="fw-semibold">@course.Title</div>
+                                        <small class="text-muted">@course.CreatedAt.ToString("dd/MM/yyyy")</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@course.Instructor?.User?.FullName</td>
+                            <td>@course.Category?.Name</td>
+                            <td>
+                                @if (course.Price == 0)
+                                {
+                                    <span class="badge bg-success">Miễn phí</span>
+                                }
+                                else
+                                {
+                                    <span>@course.Price.ToString("N0")đ</span>
+                                }
+                            </td>
+                            <td>@course.TotalStudents</td>
+                            <td>
+                                @if (course.IsPublished)
+                                {
+                                    <span class="badge bg-success">Đã xuất bản</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">Chưa xuất bản</span>
+                                }
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary toggle-publish" data-id="@course.Id">
+                                    @(course.IsPublished ? "Ẩn" : "Xuất bản")
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger delete-course" data-id="@course.Id">
+                                    Xóa
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    $('.toggle-publish').click(function() {
+        var id = $(this).data('id');
+        var button = $(this);
+        
+        $.post('/Admin/Courses/TogglePublish', { id: id })
+            .done(function(response) {
+                if (response.success) {
+                    location.reload();
+                }
+            });
+    });
+
+    $('.delete-course').click(function() {
+        var id = $(this).data('id');
+        
+        if (confirm('Bạn có chắc muốn xóa khóa học này?')) {
+            $.post('/Admin/Courses/Delete', { id: id })
+                .done(function(response) {
+                    if (response.success) {
+                        location.reload();
+                    }
+                });
+        }
+    });
+});
+</script>

@@ -1,0 +1,230 @@
+@model List<OnlineLearningPlatform.Models.Course>
+@{
+    ViewData["Title"] = "Tất cả khóa học";
+    var categories = ViewBag.Categories as List<OnlineLearningPlatform.Models.Category>;
+    var currentSearch = ViewBag.CurrentSearch as string;
+    var currentCategory = ViewBag.CurrentCategory as string;
+    var currentPrice = ViewBag.CurrentPrice as string;
+    var currentDifficulty = ViewBag.CurrentDifficulty as string;
+    var currentSort = ViewBag.CurrentSort as string;
+    var currentPage = (int)ViewBag.CurrentPage;
+    var totalPages = (int)ViewBag.TotalPages;
+    var totalCourses = (int)ViewBag.TotalCourses;
+}
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="mb-4">
+        <h1 class="fw-bold mb-2">Tất cả khóa học</h1>
+        <p class="text-muted">Khám phá hàng nghìn khóa học chất lượng cao từ các chuyên gia</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="Index">
+                <div class="row g-3">
+                    <!-- Search -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" name="search" value="@currentSearch" class="form-control" placeholder="Tìm kiếm khóa học...">
+                        </div>
+                    </div>
+
+                    <!-- Category Filter -->
+                    <div class="col-lg-2 col-md-6">
+                        <select name="category" class="form-select">
+                            <option value="">Tất cả danh mục</option>
+                            @if (categories != null)
+                            {
+                                @foreach (var category in categories)
+                                {
+                                    <option value="@category.Slug" selected="@(currentCategory == category.Slug)">@category.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Price Filter -->
+                    <div class="col-lg-2 col-md-6">
+                        <select name="price" class="form-select">
+                            <option value="">Tất cả giá</option>
+                            <option value="free" selected="@(currentPrice == "free")">Miễn phí</option>
+                            <option value="paid" selected="@(currentPrice == "paid")">Có phí</option>
+                        </select>
+                    </div>
+
+                    <!-- Difficulty Filter -->
+                    <div class="col-lg-2 col-md-6">
+                        <select name="difficulty" class="form-select">
+                            <option value="">Tất cả cấp độ</option>
+                            <option value="beginner" selected="@(currentDifficulty == "beginner")">Cơ bản</option>
+                            <option value="intermediate" selected="@(currentDifficulty == "intermediate")">Trung cấp</option>
+                            <option value="advanced" selected="@(currentDifficulty == "advanced")">Nâng cao</option>
+                        </select>
+                    </div>
+
+                    <!-- Sort -->
+                    <div class="col-lg-2 col-md-6">
+                        <select name="sort" class="form-select">
+                            <option value="newest" selected="@(currentSort == "newest")">Mới nhất</option>
+                            <option value="popular" selected="@(currentSort == "popular")">Phổ biến</option>
+                            <option value="rating" selected="@(currentSort == "rating")">Đánh giá cao</option>
+                            <option value="price-low" selected="@(currentSort == "price-low")">Giá thấp đến cao</option>
+                            <option value="price-high" selected="@(currentSort == "price-high")">Giá cao đến thấp</option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-1 col-md-6">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-filter"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Results Info -->
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                <p class="text-muted mb-0">Tìm thấy @totalCourses khóa học</p>
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-outline-secondary active">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Grid -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4 mb-5">
+            @foreach (var course in Model)
+            {
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100 shadow-sm border-0 course-card">
+                        <div class="position-relative">
+                            <img src="@course.ThumbnailUrl" class="card-img-top" alt="@course.Title" style="height: 200px; object-fit: cover;">
+                            <div class="position-absolute top-0 start-0 m-3">
+                                <span class="badge bg-primary">@course.Category?.Name</span>
+                            </div>
+                            <div class="position-absolute top-0 end-0 m-3">
+                                <span class="badge bg-secondary text-uppercase">@course.DifficultyLevel</span>
+                            </div>
+                            @if (course.Price == 0)
+                            {
+                                <div class="position-absolute bottom-0 end-0 m-3">
+                                    <span class="badge bg-success">Miễn phí</span>
+                                </div>
+                            }
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-semibold mb-2">@course.Title</h5>
+                            <p class="card-text text-muted small mb-3">@course.ShortDescription</p>
+                            <p class="text-muted small mb-3">
+                                Giảng viên: @course.Instructor?.User?.FullName
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center mb-3 small text-muted">
+                                <span><i class="fas fa-clock me-1"></i>@((course.DurationMinutes / 60)) giờ</span>
+                                <span><i class="fas fa-users me-1"></i>@course.TotalStudents.ToString("N0")</span>
+                                <span><i class="fas fa-star text-warning me-1"></i>@course.Rating</span>
+                            </div>
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        @if (course.Price == 0)
+                                        {
+                                            <span class="h5 text-success fw-bold mb-0">Miễn phí</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="h5 text-primary fw-bold mb-0">@course.Price.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</span>
+                                            @if (course.OriginalPrice.HasValue)
+                                            {
+                                                <small class="text-muted text-decoration-line-through ms-2">@course.OriginalPrice.Value.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</small>
+                                            }
+                                        }
+                                    </div>
+                                    <a asp-action="Details" asp-route-slug="@course.Slug" class="btn btn-primary btn-sm">
+                                        Xem chi tiết
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages > 1)
+        {
+            <nav aria-label="Course pagination">
+                <ul class="pagination justify-content-center">
+                    @if (currentPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" 
+                               asp-route-search="@currentSearch" 
+                               asp-route-category="@currentCategory"
+                               asp-route-price="@currentPrice"
+                               asp-route-difficulty="@currentDifficulty"
+                               asp-route-sort="@currentSort"
+                               asp-route-page="@(currentPage - 1)">Trước</a>
+                        </li>
+                    }
+
+                    @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link" asp-action="Index" 
+                               asp-route-search="@currentSearch" 
+                               asp-route-category="@currentCategory"
+                               asp-route-price="@currentPrice"
+                               asp-route-difficulty="@currentDifficulty"
+                               asp-route-sort="@currentSort"
+                               asp-route-page="@i">@i</a>
+                        </li>
+                    }
+
+                    @if (currentPage < totalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" 
+                               asp-route-search="@currentSearch" 
+                               asp-route-category="@currentCategory"
+                               asp-route-price="@currentPrice"
+                               asp-route-difficulty="@currentDifficulty"
+                               asp-route-sort="@currentSort"
+                               asp-route-page="@(currentPage + 1)">Sau</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div class="text-muted mb-4">
+                <i class="fas fa-search fa-4x"></i>
+            </div>
+            <h3 class="fw-semibold text-muted mb-2">Không tìm thấy khóa học nào</h3>
+            <p class="text-muted">Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+            <a asp-action="Index" class="btn btn-primary">Xem tất cả khóa học</a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <style>
+        .course-card:hover {
+            transform: translateY(-5px);
+            transition: transform 0.3s ease;
+        }
+    </style>
+}

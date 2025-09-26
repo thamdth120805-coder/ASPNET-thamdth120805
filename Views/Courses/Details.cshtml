@@ -1,0 +1,394 @@
+@model OnlineLearningPlatform.Models.Course
+@{
+    ViewData["Title"] = Model.Title;
+    var relatedCourses = ViewBag.RelatedCourses as List<OnlineLearningPlatform.Models.Course>;
+}
+
+<div class="container py-4">
+@Html.AntiForgeryToken()
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Course Header -->
+            <div class="mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+                        <li class="breadcrumb-item"><a asp-controller="Courses" asp-action="Index">Khóa học</a></li>
+                        <li class="breadcrumb-item active">@Model.Title</li>
+                    </ol>
+                </nav>
+                
+                <div class="d-flex align-items-center mb-3">
+                    <span class="badge bg-primary me-2">@Model.Category?.Name</span>
+                    <span class="badge bg-secondary text-uppercase">@Model.DifficultyLevel</span>
+                </div>
+                
+                <h1 class="fw-bold mb-3">@Model.Title</h1>
+                <p class="lead text-muted mb-4">@Model.ShortDescription</p>
+                
+                <div class="d-flex align-items-center flex-wrap gap-4 mb-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-star text-warning me-1"></i>
+                        <span class="fw-semibold me-1">@Model.Rating</span>
+                        <span class="text-muted">(@Model.TotalReviews đánh giá)</span>
+                    </div>
+                    <div class="d-flex align-items-center text-muted">
+                        <i class="fas fa-users me-1"></i>
+                        <span>@Model.TotalStudents.ToString("N0") học viên</span>
+                    </div>
+                    <div class="d-flex align-items-center text-muted">
+                        <i class="fas fa-clock me-1"></i>
+                        <span>@((Model.DurationMinutes / 60)) giờ</span>
+                    </div>
+                    <div class="d-flex align-items-center text-muted">
+                        <i class="fas fa-calendar me-1"></i>
+                        <span>Cập nhật @Model.UpdatedAt.ToString("dd/MM/yyyy")</span>
+                    </div>
+                </div>
+                
+                <div class="d-flex align-items-center mb-4">
+                    <img src="https://via.placeholder.com/50" alt="Instructor" class="rounded-circle me-3" width="50" height="50">
+                    <div>
+                        <div class="fw-semibold">@Model.Instructor?.User?.FullName</div>
+                        <div class="text-muted small">@Model.Instructor?.Title</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Course Video/Image -->
+            <div class="mb-4">
+                <div class="position-relative">
+                    <img src="@Model.ThumbnailUrl" alt="@Model.Title" class="img-fluid rounded-3 w-100" style="height: 400px; object-fit: cover;">
+                    <div class="position-absolute top-50 start-50 translate-middle">
+                        <button class="btn btn-primary btn-lg rounded-circle" style="width: 80px; height: 80px;">
+                            <i class="fas fa-play fs-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Course Description -->
+            <div class="mb-5">
+                <h3 class="fw-bold mb-3">Mô tả khóa học</h3>
+                <div class="text-muted">
+                    @Html.Raw(Model.Description?.Replace("\n", "<br>"))
+                </div>
+            </div>
+
+            <!-- What You'll Learn -->
+            @if (!string.IsNullOrEmpty(Model.WhatYouLearn))
+            {
+                <div class="mb-5">
+                    <h3 class="fw-bold mb-3">Bạn sẽ học được gì</h3>
+                    <div class="row">
+                        @foreach (var item in Model.WhatYouLearn.Split(','))
+                        {
+                            <div class="col-md-6 mb-2">
+                                <div class="d-flex align-items-start">
+                                    <i class="fas fa-check text-success me-2 mt-1"></i>
+                                    <span>@item.Trim()</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Requirements -->
+            @if (!string.IsNullOrEmpty(Model.Requirements))
+            {
+                <div class="mb-5">
+                    <h3 class="fw-bold mb-3">Yêu cầu</h3>
+                    <ul class="list-unstyled">
+                        @foreach (var req in Model.Requirements.Split(','))
+                        {
+                            <li class="mb-2">
+                                <i class="fas fa-circle text-muted me-2" style="font-size: 0.5rem;"></i>
+                                @req.Trim()
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <!-- Course Content -->
+            @if (Model.Modules != null && Model.Modules.Any())
+            {
+                <div class="mb-5">
+                    <h3 class="fw-bold mb-3">Nội dung khóa học</h3>
+                    <div class="accordion" id="courseContent">
+                        @for (int i = 0; i < Model.Modules.Count; i++)
+                        {
+                            var module = Model.Modules.ElementAt(i);
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button @(i == 0 ? "" : "collapsed")" type="button" data-bs-toggle="collapse" data-bs-target="#module@(i)">
+                                        <div class="d-flex justify-content-between w-100 me-3">
+                                            <span class="fw-semibold">@module.Title</span>
+                                            <span class="text-muted small">@module.Lessons.Count bài học</span>
+                                        </div>
+                                    </button>
+                                </h2>
+                                <div id="module@(i)" class="accordion-collapse collapse @(i == 0 ? "show" : "")" data-bs-parent="#courseContent">
+                                    <div class="accordion-body">
+                                        @if (!string.IsNullOrEmpty(module.Description))
+                                        {
+                                            <p class="text-muted mb-3">@module.Description</p>
+                                        }
+                                        @if (module.Lessons != null && module.Lessons.Any())
+                                        {
+                                            <div class="list-group list-group-flush">
+                                                @foreach (var lesson in module.Lessons.OrderBy(l => l.OrderIndex))
+                                                {
+                                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <div class="d-flex align-items-center">
+                                                            <i class="fas fa-play-circle text-primary me-2"></i>
+                                                            <span>@lesson.Title</span>
+                                                            @if (lesson.IsPreview)
+                                                            {
+                                                                <span class="badge bg-success ms-2">Xem trước</span>
+                                                            }
+                                                        </div>
+                                                        <span class="text-muted small">@lesson.DurationMinutes phút</span>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Reviews -->
+            @if (Model.Reviews != null && Model.Reviews.Any())
+            {
+                <div class="mb-5">
+                    <h3 class="fw-bold mb-3">Đánh giá từ học viên</h3>
+                    @foreach (var review in Model.Reviews.Take(5))
+                    {
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <img src="https://via.placeholder.com/40" alt="Student" class="rounded-circle me-3" width="40" height="40">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold">@review.Student?.FullName</div>
+                                        <div class="d-flex align-items-center">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <i class="fas fa-star @(i <= review.Rating ? "text-warning" : "text-muted")"></i>
+                                            }
+                                            <span class="text-muted ms-2 small">@review.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                @if (!string.IsNullOrEmpty(review.Comment))
+                                {
+                                    <p class="mb-0 text-muted">@review.Comment</p>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm sticky-top" style="top: 100px;">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        @if (Model.Price == 0)
+                        {
+                            <div class="h2 text-success fw-bold mb-0">Miễn phí</div>
+                        }
+                        else
+                        {
+                            <div class="h2 text-primary fw-bold mb-0">@Model.Price.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</div>
+                            @if (Model.OriginalPrice.HasValue)
+                            {
+                                <div class="text-muted text-decoration-line-through">@Model.OriginalPrice.Value.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</div>
+                                <div class="text-success small">Tiết kiệm @((Model.OriginalPrice.Value - Model.Price).ToString("C0", new System.Globalization.CultureInfo("vi-VN")))</div>
+                            }
+                        }
+                    </div>
+
+                    <div class="d-grid gap-2 mb-4">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <button class="btn btn-primary btn-lg enroll-course" data-course-id="@Model.Id">
+                                <i class="fas fa-shopping-cart me-2"></i>Đăng ký học
+                            </button>
+                            <button class="btn btn-outline-secondary add-to-wishlist" data-course-id="@Model.Id">
+                                <i class="fas fa-heart me-2"></i>Thêm vào yêu thích
+                            </button>
+                        }
+                        else
+                        {
+                            <a href="/Auth/Login" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập để học
+                            </a>
+                        }
+                    </div>
+
+                    <div class="border-top pt-3">
+                        <h6 class="fw-semibold mb-3">Khóa học bao gồm:</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-video text-primary me-2"></i>
+                                @((Model.DurationMinutes / 60)) giờ video
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-file-alt text-primary me-2"></i>
+                                Tài liệu học tập
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-mobile-alt text-primary me-2"></i>
+                                Truy cập trên mobile
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-infinity text-primary me-2"></i>
+                                Truy cập trọn đời
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-certificate text-primary me-2"></i>
+                                Chứng chỉ hoàn thành
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="border-top pt-3">
+                        <h6 class="fw-semibold mb-3">Chia sẻ khóa học:</h6>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary btn-sm flex-fill">
+                                <i class="fab fa-facebook-f"></i>
+                            </button>
+                            <button class="btn btn-outline-info btn-sm flex-fill">
+                                <i class="fab fa-twitter"></i>
+                            </button>
+                            <button class="btn btn-outline-success btn-sm flex-fill">
+                                <i class="fab fa-whatsapp"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm flex-fill">
+                                <i class="fas fa-link"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Courses -->
+    @if (relatedCourses != null && relatedCourses.Any())
+    {
+        <div class="mt-5">
+            <h3 class="fw-bold mb-4">Khóa học liên quan</h3>
+            <div class="row g-4">
+                @foreach (var course in relatedCourses)
+                {
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card h-100 shadow-sm border-0">
+                            <img src="@course.ThumbnailUrl" class="card-img-top" alt="@course.Title" style="height: 150px; object-fit: cover;">
+                            <div class="card-body d-flex flex-column">
+                                <h6 class="card-title fw-semibold mb-2">@course.Title</h6>
+                                <p class="card-text text-muted small mb-3">@course.ShortDescription</p>
+                                <div class="mt-auto">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        @if (course.Price == 0)
+                                        {
+                                            <span class="text-success fw-bold">Miễn phí</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-primary fw-bold">@course.Price.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</span>
+                                        }
+                                        <a asp-action="Details" asp-route-slug="@course.Slug" class="btn btn-primary btn-sm">Xem</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    console.log('JavaScript loaded');
+    
+    // Đăng ký khóa học
+    $('.enroll-course').click(function(e) {
+        e.preventDefault();
+        console.log('Enroll button clicked');
+        
+        var courseId = $(this).data('course-id');
+        var button = $(this);
+        
+        console.log('Course ID:', courseId);
+        
+        button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...');
+        
+        $.post('/Member/EnrollCourse', { 
+            courseId: courseId,
+            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+        })
+            .done(function(response) {
+                console.log('Response:', response);
+                if (response.success) {
+                    toastr.success(response.message);
+                    button.removeClass('btn-primary').addClass('btn-success')
+                          .html('<i class="fas fa-check me-2"></i>Đã đăng ký');
+                } else {
+                    toastr.error(response.message);
+                    button.prop('disabled', false).html('<i class="fas fa-shopping-cart me-2"></i>Đăng ký học');
+                }
+            })
+            .fail(function(xhr, status, error) {
+                console.log('Error:', xhr.responseText);
+                toastr.error('Có lỗi xảy ra: ' + error);
+                button.prop('disabled', false).html('<i class="fas fa-shopping-cart me-2"></i>Đăng ký học');
+            });
+    });
+
+    // Thêm vào wishlist
+    $('.add-to-wishlist').click(function(e) {
+        e.preventDefault();
+        console.log('Wishlist button clicked');
+        
+        var courseId = $(this).data('course-id');
+        var button = $(this);
+        
+        console.log('Course ID:', courseId);
+        
+        button.prop('disabled', true);
+        
+        $.post('/Member/AddToWishlist', { 
+            courseId: courseId,
+            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+        })
+            .done(function(response) {
+                console.log('Response:', response);
+                if (response.success) {
+                    toastr.success(response.message);
+                    button.removeClass('btn-outline-secondary').addClass('btn-danger')
+                          .html('<i class="fas fa-heart me-2"></i>Đã thêm vào yêu thích');
+                } else {
+                    toastr.error(response.message);
+                    button.prop('disabled', false);
+                }
+            })
+            .fail(function(xhr, status, error) {
+                console.log('Error:', xhr.responseText);
+                toastr.error('Có lỗi xảy ra: ' + error);
+                button.prop('disabled', false);
+            });
+    });
+});
+</script>

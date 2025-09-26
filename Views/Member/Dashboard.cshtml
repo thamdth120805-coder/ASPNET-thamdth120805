@@ -1,0 +1,183 @@
+@model IEnumerable<OnlineLearningPlatform.Models.Enrollment>
+@{
+    ViewData["Title"] = "Trang thành viên";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar bg-light">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="@Url.Action("Dashboard", "Member")">
+                            <i class="fas fa-tachometer-alt"></i> Tổng quan
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("MyCourses", "Member")">
+                            <i class="fas fa-book"></i> Khóa học của tôi
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Wishlist", "Member")">
+                            <i class="fas fa-heart"></i> Danh sách yêu thích
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Profile", "Member")">
+                            <i class="fas fa-user"></i> Thông tin cá nhân
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Trang thành viên</h1>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4>@Model.Count()</h4>
+                                    <p class="mb-0">Khóa học đã đăng ký</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-book fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-success">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4>@Model.Count(e => e.CompletedAt != null)</h4>
+                                    <p class="mb-0">Khóa học hoàn thành</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-check-circle fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-warning">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4>@Model.Count(e => e.CompletedAt == null)</h4>
+                                    <p class="mb-0">Đang học</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-play-circle fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-info">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4>@(Model.Any() ? Math.Round(Model.Average(e => e.ProgressPercentage), 1) : 0)%</h4>
+                                    <p class="mb-0">Tiến độ trung bình</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-chart-line fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Courses -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Khóa học gần đây</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <div class="row">
+                            @foreach (var enrollment in Model.Take(4))
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <div class="card">
+                                        <div class="row g-0">
+                                            <div class="col-md-4">
+                                                <img src="@(enrollment.Course.ThumbnailUrl ?? "/images/default-course.jpg")" 
+                                                     class="img-fluid rounded-start h-100 object-fit-cover" 
+                                                     alt="@enrollment.Course.Title">
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">@enrollment.Course.Title</h6>
+                                                    <p class="card-text text-muted small">@enrollment.Course.Instructor?.User?.FullName</p>
+                                                    <div class="progress mb-2" style="height: 5px;">
+                                                        <div class="progress-bar" role="progressbar" 
+                                                             style="width: @enrollment.ProgressPercentage%" 
+                                                             aria-valuenow="@enrollment.ProgressPercentage" 
+                                                             aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                    <small class="text-muted">@enrollment.ProgressPercentage% hoàn thành</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="@Url.Action("MyCourses", "Member")" class="btn btn-primary">Xem tất cả khóa học</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                            <h5>Chưa có khóa học nào</h5>
+                            <p class="text-muted">Bạn chưa đăng ký khóa học nào. Hãy khám phá các khóa học thú vị!</p>
+                            <a href="@Url.Action("Index", "Courses")" class="btn btn-primary">Khám phá khóa học</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<style>
+.sidebar {
+    min-height: calc(100vh - 56px);
+}
+
+.sidebar .nav-link {
+    color: #333;
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.object-fit-cover {
+    object-fit: cover;
+}
+</style>
